@@ -3,7 +3,7 @@
 
 2. Here is checking list for your project
 
-	- Test your simulator and generate correctly result __in workstation__ 
+	- Test your simulator and generate correct result __in workstation__ 
 
 	- Make sure you can execute makefile correctly __in workstation__
 
@@ -11,4 +11,4 @@
 
 	- File compression format is restricted to be tar.gz
 
-	(Please check the tutorial_1 slide for detail P34~P37)
+	(Please check the tutorial_1 slide P34~P37 for detail)
