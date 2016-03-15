@@ -9,3 +9,5 @@ class AllRegister {
 public:
     Register reg[32], PC; /* both have .value & .Hex() */
 }
+
+#endif
