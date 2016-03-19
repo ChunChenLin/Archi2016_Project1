@@ -1,13 +1,7 @@
-#ifndef instruction_h
-#define instruction_h
+#include "global.h"
 
-#include "register.h"
-#include<string>
+void R_format(string op);
+void I_format(string op);
+void J_format(string op);
 
-using namespace std;
 
-void R_format(string op, int rs, int rt, int rd, int shamt);
-void I_format(string op, int rs, int rt, int imm);
-void J_format(string op, unsigned int addr);
-
-#endif 
