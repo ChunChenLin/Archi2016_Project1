@@ -1,13 +1,8 @@
-#ifndef global_h
-#define global_h
+#include <stdio.h>
+#include <stdlib.h>
 
-#include "register.h"
-
-using namespace std;
-
-class AllRegister {
-public:
-    Register reg[32], PC; /* both have .value & .Hex() */
-}
-
-#endif
+FILE *iimage, *dimage;
+unsigned iimageLen, dimageLen;
+unsigned reg[32], PC;
+char *iimageBuffer, *dimageBuffer;
+char DMemory[1024], IMemory[1024];
