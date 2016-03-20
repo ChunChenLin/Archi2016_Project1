@@ -3,176 +3,181 @@
 /* look up Appendix A */
 
 void R_format(string op) { /* func is merged into op */
-    if(op == "add")	AllRegister::reg[rd].value = AllRegister::reg[rs].value + AllRegister::reg[rt].value;
-	else if(op == "addu") AllRegister::reg[rd].value = AllRegister::reg[rs].value + AllRegister::reg[rt].value; /* unsigned */
-	else if(op == "sub") AllRegister::reg[rd].value = AllRegister::reg[rs].value - AllRegister::reg[rt].value;
-	else if(op == "and") AllRegister::reg[rd].value = AllRegister::reg[rs].value & AllRegister::reg[rt].value;
-	else if(op == "or")	AllRegister::reg[rd].value = AllRegister::reg[rs].value | AllRegister::reg[rt].value;
-	else if(op == "xor") AllRegister::reg[rd].value = AllRegister::reg[rs].value ^ AllRegister::reg[rt].value;
-	else if(op == "nor") AllRegister::reg[rd].value = ~(AllRegister::reg[rs].value | AllRegister::reg[rt].value);
-	else if(op == "nand") AllRegister::reg[rd].value = ~(AllRegister::reg[rs].value & AllRegister::reg[rt].value);
-	else if(op == "slt") AllRegister::reg[rd].value = (AllRegister::reg[rs].value < AllRegister::reg[rt].value);
+    RsRtRd(&rs, &rt, &rd);
 
-	else if(op == "sll") AllRegister::reg[rd].value = AllRegister::reg[rt].value << shamt;
-	else if(op == "srl") { /* remain original pos/neg */
-		int temp = AllRegister::reg[rt].value >> shamt;
-		bitset<32> bs = temp;
-		/* 
-  			......................
-		*/
+    if(op == "add")	{
+    	reg[rd] = reg[rs] + reg[rt];
+    }
+	else if(op == "addu") {
+		reg[rd] = reg[rs] + reg[rt];
 	}
-	else if(op == "sra") AllRegister::reg[rd].value = AllRegister::reg[rt].value >> shamt;
-	else if(op == "jr") AllRegister::PC.value = AllRegister::reg[rs].value; return; /* don't need to plus 4*/
+	else if(op == "sub") {
+		reg[rd] = reg[rs] - reg[rt];
+	}
+	else if(op == "and") {
+		reg[rd] = reg[rs] & reg[rt];
+	}
+	else if(op == "or")	{
+		reg[rd] = reg[rs] | reg[rt];
+	}
+	else if(op == "xor") {
+		reg[rd] = reg[rs] ^ reg[rt];
+	}
+	else if(op == "nor") {
+		reg[rd] = ~(reg[rs] | reg[rt]);
+	}
+	else if(op == "nand") {
+		reg[rd] = ~(reg[rs] & reg[rt]);
+	}
+	else if(op == "slt") {
+		reg[rd] = ((int)reg[rs] < (int)reg[rt]) ? 1 : 0;
+	}
+	else if(op == "sll") {
+		Shamt(&shamt);
+		reg[rd] = reg[rt] << shamt;
+	}
+	else if(op == "srl") { /* remain original pos/neg */
+		Shamt(&shamt);
+		reg[rd] = reg[rt] >> shamt;
+	}
+	else if(op == "sra") { /* $d = $t >> C, with sign bit shifted in*/
+		Shamt(&shamt);
+		reg[rd] = (int)reg[rt] >> shamt;
+	}
+	else if(op == "jr") {
+		PC = reg[rs];
+		return;
+	}
 
-	AllRegister::PC.value += 4; /* need to plus 4 immediately*/ 
+	PC += 4; /* need to plus 4 immediately*/
 }
 
 void I_format(string op) {
-	if(op == "addi") AllRegister::reg[rt].value = AllRegister.reg[rs].value + imm;
+	unsigned t1, t2, t3, t4;
+
+	RsRtRd(&rs, &rt, NULL);
+
+	if(op == "addi") {
+		SignedImmediate(&immediate);
+		reg[rt] = reg[rs] + immediate;
+	}
 	else if(op == "addiu") {
-		unsigned int ui = imm; 
-		AllRegister::reg[rt].value = AllRegister::reg[rs].value + ui;
+		UnsignedImmediate(&immediate);
+		reg[rt] = reg[rs] + immediate;
 	}
 	else if(op == "lw") {
-		/* $t = 4 bytes from Memory[$s + C(signed)] */
-		int Word[32];
-		memset(Word, 0, sizeof(Word));
-		for(int i=4; i>0; i--) { // byte
-			for(int j=0; j<8; j++) { // bit
-				Word[i*8-1-j] = DataMemory::Memory[AllRegister::reg[rs].value+imm+(4-i)][7-j];
-			}
-		}
-		AllRegister::reg[rt].value = /* signed */;
+		SignedImmediate(&immediate);
+		position = reg[rs] + immediate; // need detection
+		t1 = DMemory[position] << 24;
+		t2 = DMemory[position+1] << 24 >> 8;
+		t3 = DMemory[position+2] << 24 >> 16;
+		t4 = DMemory[position+3] << 24 >> 24;
+		reg[rt] = t1 + t2 + t3 + t4;
+
 	}
 	else if(op == "lh") {
-		/* $t = 2 bytes from Memory[$s + C(signed)], signed */
-		int Word[32];
-		memset(Word, 0, sizeof(Word));
-		for(int i=2; i>0; i--) {
-			for(int j=0; j<8; j++) {
-				Word[i*8-1-j] = DataMemory::Memory[AllRegister::reg[rs].value+imm+(2-i)][7-j];
-			}
-		}
-		AllRegister::reg[rt].value = /* signed */;
+		SignedImmediate(&immediate);
+		position = reg[rs] + immediate; // need detection
+		t1 = DMemory[position] << 24 >> 16;
+		t2 = DMemory[position+1] << 24 >> 24;
+		reg[rt] = (short)(t1 + t2);
 	}
 	else if(op == "lhu") {
-		/* $t = 2 bytes from Memory[$s + C(signed)], unsigned */
-		int Word[32];
-		memset(Word, 0, sizeof(Word));
-		for(int i=2; i>0; i--) {
-			for(int j=0; j<8; j++) {
-				Word[i*8-1-j] = DataMemory::Memory[AllRegister::reg[rs].value+imm+(2-i)][7-j];
-			}
-		}
-		AllRegister::reg[rt].value = /* unsigned */;
+		SignedImmediate(&immediate);
+		position = reg[rs] + immediate; // need detection
+		t1 = DMemory[position] << 24 >> 16;
+		t2 = DMemory[position+1] << 24 >> 24;
+		reg[rt] = t1 + t2;
 	}
 	else if(op == "lb") {
-		/* $t = Memory[$s + C(signed)], signed */
-		int Word[32];
-		memset(Word, 0, sizeof(Word));
-		for(int i=0; i<8; i++) {
-			Word[i] = DataMemory::Memory[AllRegister::reg[rs].value+imm][i];
-		}
-		AllRegister::reg[rt].value = /* signed */;
+		SignedImmediate(&immediate);
+		position = reg[rs] + immediate; // need detection
+		reg[rt] = DMemory[position];
 	}
 	else if(op == "lbu") {
-		/* $t = Memory[$s + C(signed)], unsigned */
-		int Word[32];
-		memset(Word, 0, sizeof(Word));
-		for(int i=0; i<8; i++) {
-			Word[i] = DataMemory::Memory[AllRegister::reg[rs].value+imm][i];
-		}
-		AllRegister::reg[rt].value = /* unsigned */;
+		SignedImmediate(&immediate);
+		position = reg[rs] + immediate; // need detection
+		reg[rt] = DMemory[position] << 24 >> 24;
 	}
 	else if(op == "sw") {
-		/* 4 bytes from Memory[$s + C(signed)] = $t */
-		bitset<32> bs;
-		bs = AllRegister::reg[rt].value;
-		for(int i=4; i>0; i--) { // byte
-			for(int j=0; j<8; j++) { //bit
-				DataMemory::Memory[AllRegister::reg[rs].value+imm+(4-i)].push_back(bs[(i-1)*8+j]);
-			}
-		}
+		SignedImmediate(&immediate);
+		position = reg[rs] + immediate; // need detection
+		DMemory[position] = reg[rt] >> 24;
+		DMemory[position+1] = reg[rt] << 8 >> 24;
+		DMemory[position+2] = reg[rt] << 16 >> 24;
+		DMemory[position+3] = reg[rt] << 24 >> 24;
 	}
 	else if(op == "sh") {
-		/* 2 bytes from Memory[$s + C(signed)] = $t & 0x0000FFFF */
-		bitset<32> bs;
-		bs = AllRegister::reg[rt].value;
-		for(int i=2; i>0; i--) {
-			for(int j=0; j<8; j++) {
-				DataMemory::Memory[AllRegister::reg[rs].value+imm+(2-i)].push_back(bs[(i-1)*8+j]);
-			}
-		}
+		SignedImmediate(&immediate);
+		position = reg[rs] + immediate; // need detection
+		DMemory[position] = reg[rt] << 16 >> 24;
+		DMemory[position+1] = reg[rt] << 24 >> 24;
 	}
 	else if(op == "sb") {
-		/* Memory[$s + C(signed)] = $t & 0x000000FF */
-		bitset<32> bs;
-		bs = AllRegister::reg[rt].value;
-		for(int i=0; i<8; i++) {
-			DataMemory::Memory[AllRegister::reg[rs].value+imm].push_back(bs[j]);
-		}
+		SignedImmediate(&immediate);
+		position = reg[rs] + immediate; // need detection
+		DMemory[position] = reg[rt] << 24 >> 24;
+	}
+	else if(op == "lui") {
+		UnsignedImmediate(&immediate);
+		reg[rt] = immediate << 16;
 	}
 	else if(op == "andi") {
-		unsigned int ui = imm;
-		AllRegister::reg[rt].value = AllRegister::reg[rs].value & ui;
+		UnsignedImmediate(&immediate);
+		reg[rt] = reg[rs] & immediate;
 	}
 	else if(op == "ori") {
-		unsigned int ui = imm;
-		AllRegister::reg[rt].value = AllRegister::reg[rs].value & ui;
+		UnsignedImmediate(&immediate);
+		reg[rt] = reg[rs] | immediate;
 	}
 	else if(op == "nori") {
-		unsigned int  ui = imm;
-		AllRegister::reg[rt].value = AllRegister::reg[rs].value ^ ui;
+		UnsignedImmediate(&immediate);
+		reg[rt] = ~(reg[rs] | immediate);
 	}
 	else if(op == "slti") {
-		AllRegister::reg[rt].value = (AllRegister::reg[rs] < imm);
+		SignedImmediate(&immediate);
+		reg[rt] = ((int)reg[rs] < (int)immediate) ? 1 : 0;
 	}
 	else if(op == "beq") {
-		/* if ($s == $t) go to PC+4+4*C(signed) */ 
-		if(AllRegister::reg[rs].value == AllRegister::reg[rt].value) {
-			AllRegister::PC.value = AllRegister::PC.value + 4 + 4 * imm; 
+		SignedImmediate(&immediate);
+		if(reg[rs]==reg[rt]) {
+			PC += (4 + (immediate << 2));
 			return;
 		}
 	}
 	else if(op == "bne") {
-		/* if ($s != $t) go to PC+4+4*C(signed) */
-		if(AllRegister::reg[rs].value != AllRegister::reg[rt].value) {
-			AllRegister::PC.value = AllRegister::PC.value + 4 + 4 * imm; 
+		SignedImmediate(&immediate);
+		if(reg[rs]!=reg[rt]) {
+			PC += (4 + (immediate << 2));
 			return;
 		}
 	}
-	else if(op == "lui") {
-		AllRegister::reg[rt].value = imm << 16;
-		return;
-	}
 	else if(op == "bgtz") {
-		/* if ($s > 0) go to PC+4+4*C(signed) */
-		if(AllRegister::reg[rs].value > 0) {
-			AllRegister::PC.value = AllRegister::PC.value + 4 + 4 * imm;
+		SignedImmediate(&immediate);
+		if((int)reg[rs] > 0) {
+			PC += (4 + (immediate << 2));
 			return;
 		}
 	}
 
-	AllRegister::PC.value += 4;
+	PC += 4;
 }
 
 void J_format(string op) {
-	if(op == "jal") AllRegister::reg[31].value = AllRegister::PC.value + 4;  /* $31 = PC + 4; */
+	unsigned t1, t2, t3, t4;
 
-	/* PC = (PC+4)[31:28] | 4*C(unsigned) */
-	AllRegister::PC.value += 4; /* [31:28] + [27:0] */
-	addr = addr << 2; /* 4*C */
+	if(op=="jal") reg[31] = PC + 4;
 
-	int Word[32];
-	memset(Word, 0, sizeof(Word));
-	bitset<32> b1, b2;
-	b1 = AllRegister::PC.value;
-	b2 = addr;
-	
-	for(int i=0; i<=27; i++) Word[i] = b2[i];
-	for(int i=28; i<=31; i++) Word[i] = b1[i];
-
-	AllRegister::PC.value = /* ......... */;
+	t1 = IMemory[PC];
+	t2 = IMemory[PC+1];
+    t3 = IMemory[PC+2];
+    t4 = IMemory[PC + 3];
+    t1 = t1 << 30 >> 6;
+    t2 = t2 << 24 >> 8;
+    t3 = t3 << 24 >> 16;
+    t4 = t4 << 24 >> 24;
+    address = t1 + t2 + t3 + t4;
+    PC = ((PC + 4) >> 28 << 28) | (address << 2); 
 }  
 
 
