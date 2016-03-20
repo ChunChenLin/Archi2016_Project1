@@ -1,28 +1,19 @@
-#include<iostream>
-#include<fstream>
-#include<string>
-#include<bitset>
-
-using namespace std;
+#include <stdio.h>
+#include <stdlib.h>
+#include "global.h"
+#include "load.h"
+#include "resolve.h"
+#include "translate.h"
+#include "instruction.h"
 
 int main() {
-    int word[32];
-    char ch;
-    bitset<8> bs;    
+    Open();
+    DImg();
+    IImg();
 
-    /* Read iimage.bin */
-    ifstream fin("../testcase/iimage.bin",ios::in | ios::binary);
-    if(!fin) cout<<"Can't load iimage.bin\n";
-    
-    /* until the end of the file */
-    while(!fin.eof()) {
-        
+    while(1) {
+    	Assembly();
     }
-    fin.close();
 
-    /* Read dimage.bin */
-    ifstream fin("../testcase/dimage.bin",ios::in | ios::binary);
-    if(!fin) cout<<"Can't load dimage.bin\n";
-
-    fin.close();
+    return 0;
 }

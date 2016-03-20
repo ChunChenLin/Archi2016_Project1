@@ -3,8 +3,10 @@
 void Assembly() {
 
 	/* judge and call instruction func */
+	Opcode(&op);
 	switch (op) {
-		case 0:
+		case 0: //R format
+			Func(&func);
 			switch (func) {
 				case 32:
 					R_format("add");
@@ -109,6 +111,7 @@ void Assembly() {
 			break;
 		case 63:
 			/* halt */
+			return;
 	}
 }
 
