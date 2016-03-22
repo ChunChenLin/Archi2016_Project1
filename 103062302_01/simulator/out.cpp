@@ -25,10 +25,10 @@ void snapShot() {
 	for(int i=0; i<32; i++) {
 		//fprintf(snapshot, "$%2d: 0x", i);
 		//fprintf(snapshot, "%8x\n", reg[i]);
-		printf("$%2d: 0x", i);
-		printf("%8x\n", reg[i]);
+		printf("$%02d: 0x", i);
+		printf("%08X\n", reg[i]);
 	}
 	//fprintf(snapshot, "PC: 0x%8x\n\n\n", PC);
-	printf("PC: 0x%8x\n\n\n", PC);
+	printf("PC: 0x%08X\n\n\n", PC);
 	cycle++;
 }
