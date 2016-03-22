@@ -1,12 +1,12 @@
 #include "global.h"
 
-void Opcode(unsigned *op);
+void Opcode();
 
-void RsRtRd(unsigned *rs, unsigned *rt, unsigned *rd);
+void RsRtRd();
 
 void Shamt(unsigned *shamt);
 
-void Func(unsigned *func);
+void Func();
 
 void UnsignedImmediate(unsigned *immediate);
 

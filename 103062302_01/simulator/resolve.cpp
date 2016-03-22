@@ -1,23 +1,23 @@
 #include "resolve.h"
 
-void Opcode(unsigned *op) {
+void Opcode() {
 	op = IMemory[PC];
 	op = op >> 2 << 26 >> 26;
 }
 
-void RsRtRd(unsigned *rs, unsigned *rt, unsigned *rd) {
+void RsRtRd() {
 	unsigned t1 = IMemory[PC], t2 = IMemory[PC+1];
 	t1 = t1 << 30 >> 27;
 	t2 = t2 << 24 >> 29;
-	*rs = t1 + t2;
+	rs = t1 + t2;
 
-	*rt = IMemory[PC+1];
-	*rt = (*rt) << 27 >> 27;
+	rt = IMemory[PC+1];
+	rt = rt << 27 >> 27;
 
-	if(rd!=NULL) {
-		*rd = IMemory[PC+2];
-		*rd = (*rd) << 24 >> 27;
-	}
+	//if(rd!=NULL) {
+		rd = IMemory[PC+2];
+		rd = rd << 24 >> 27;
+	//}
 }
 
 void Shamt(unsigned *shamt) {
@@ -27,7 +27,7 @@ void Shamt(unsigned *shamt) {
 	*shamt = t1 + t2;
 }
 
-void Func(unsigned *func) {
+void Func() {
 	func = IMemory[PC+3];
 	func = func << 26 >> 26;
 }

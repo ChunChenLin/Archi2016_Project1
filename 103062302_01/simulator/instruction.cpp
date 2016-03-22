@@ -1,9 +1,10 @@
 #include "instruction.h"
+#include "global.h"
 
 /* look up Appendix A */
 
 void R_format(string op) { /* func is merged into op */
-    RsRtRd(&rs, &rt, &rd);
+    RsRtRd();
 
     if(op == "add")	{
     	reg[rd] = reg[rs] + reg[rt];
@@ -36,11 +37,11 @@ void R_format(string op) { /* func is merged into op */
 		Shamt(&shamt);
 		reg[rd] = reg[rt] << shamt;
 	}
-	else if(op == "srl") { /* remain original pos/neg */
+	else if(op == "srl") { // remain original pos/neg
 		Shamt(&shamt);
 		reg[rd] = reg[rt] >> shamt;
 	}
-	else if(op == "sra") { /* $d = $t >> C, with sign bit shifted in*/
+	else if(op == "sra") { // $d = $t >> C, with sign bit shifted in
 		Shamt(&shamt);
 		reg[rd] = (int)reg[rt] >> shamt;
 	}
@@ -49,13 +50,13 @@ void R_format(string op) { /* func is merged into op */
 		return;
 	}
 
-	PC += 4; /* need to plus 4 immediately*/
+	PC += 4; // need to plus 4 immediately
 }
 
 void I_format(string op) {
 	unsigned t1, t2, t3, t4;
 
-	RsRtRd(&rs, &rt, NULL);
+	RsRtRd();
 
 	if(op == "addi") {
 		SignedImmediate(&immediate);
@@ -177,7 +178,7 @@ void J_format(string op) {
     t3 = t3 << 24 >> 16;
     t4 = t4 << 24 >> 24;
     address = t1 + t2 + t3 + t4;
-    PC = ((PC + 4) >> 28 << 28) | (address << 2); 
-}  
+    PC = ((PC + 4) >> 28 << 28) | (address << 2);
+}
 
 
