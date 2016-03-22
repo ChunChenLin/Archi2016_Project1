@@ -11,9 +11,17 @@ int main() {
     DImg();
     IImg();
 
-    while(1) {
+    halt = false;
+    while(!halt) {
+    	write2Zero = false;
+    	numberOverflow = false;
+    	memoryOverflow = false;
+    	dataMisaaligned = false;
+    	snapShot();
     	Assembly();
+    	errorDump();
     }
+    //errorDump();
 
     return 0;
 }

@@ -3,6 +3,8 @@
 void Open() {
 	iimage = fopen("iimage.bin", "rb");
 	dimage = fopen("dimage.bin", "rb");
+	error_dump = fopen("error_dump.rpt", "wb");
+	snapshot = fopen("snapshot.rpt", "wb");
 
     fseek(iimage, 0, SEEK_END);
     fseek(dimage, 0, SEEK_END);

@@ -111,7 +111,8 @@ void Assembly() {
 			break;
 		case 63:
 			/* halt */
-			return;
+			halt = true;
+			break;
 	}
 }
 
