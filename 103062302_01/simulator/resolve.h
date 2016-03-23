@@ -4,12 +4,12 @@ void Opcode();
 
 void RsRtRd();
 
-void Shamt(unsigned *shamt);
+void Shamt();
 
 void Func();
 
-void UnsignedImmediate(unsigned *immediate);
+void UnsignedImmediate();
 
-void SignedImmediate(unsigned *immediate);
+void SignedImmediate();
 
-void Address(unsigned *address);
+void Address();

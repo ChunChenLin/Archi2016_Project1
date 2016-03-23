@@ -11,6 +11,6 @@ extern unsigned iimageLen, dimageLen;
 extern unsigned reg[32], PC, cycle;
 extern unsigned op, rs, rt, rd, func, shamt, immediate, address, position;
 extern char *iimageBuffer, *dimageBuffer;
-extern char DMemory[1024], IMemory[1024];
+extern unsigned char DMemory[1024], IMemory[1024];
 
 
