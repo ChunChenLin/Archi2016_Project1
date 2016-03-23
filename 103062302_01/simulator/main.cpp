@@ -32,7 +32,7 @@ int main() {
     	Assembly();
     	errorDump();
     }
-    errorDump();
+    //errorDump();
 
     return 0;
 }
