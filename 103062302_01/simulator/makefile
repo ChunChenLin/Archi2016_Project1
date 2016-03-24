@@ -9,4 +9,4 @@ SRC: $(SRCS)
 	$(CC) -c $(SRCS)
 
 clean: $(OBS)
-	rm -f $(OBS) single_cycle 
+	rm -f $(OBS) 
