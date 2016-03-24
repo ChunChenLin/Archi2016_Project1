@@ -57,7 +57,16 @@ inline bool detectDataMisaaligned(int n) {
 		return true;
 	} else return false;
 }
-
+/*
+inline int signExtension(char instr) {
+    int value = (0x0000FFFF & instr);
+    int mask = 0x00000080;
+    int sign = (mask & instr) >> 15;
+    if (sign == 1)
+        value += 0xFFFF0000;
+    return value;
+}
+*/
 void R_format(string op) { /* func is merged into op */
     RsRtRd();
 
@@ -126,6 +135,7 @@ void R_format(string op) { /* func is merged into op */
 
 void I_format(string op) {
 	unsigned t1, t2, t3, t4;
+	int inT1, inT2, intT3, inT4;
 
 	RsRtRd();
 
@@ -165,9 +175,16 @@ void I_format(string op) {
 		position = reg[rs] + immediate; // need detection
 		if(detectMemoryOverflow(1)) return;
 		if(detectDataMisaaligned(1)) return;
-		t1 = DMemory[position] << 8; //<< 24 >> 16;
+		/*t1 = DMemory[position];//<< 8;//<< 24 >> 16;
+		t1 = t1 << 24 >> 16;
 		t2 = DMemory[position+1];//<< 24 >> 24;
-		reg[rt] = (short)(t1 + t2);
+		t2 = t2 << 24 >> 24;
+		reg[rt] = (short)(t1 + t2);*/
+		inT1 = DMemory[position];
+		inT1 = inT1 << 24 >> 16;
+		inT2 = DMemory[position+1];
+		inT2 = inT2 << 24 >> 24;
+		reg[rt] = (short)(inT1+inT2);
 		detectWrite2Zero("I");
 		detectNumberOverflow("I", true);
 	}
@@ -176,8 +193,8 @@ void I_format(string op) {
 		position = reg[rs] + immediate; // need detection
 		if(detectMemoryOverflow(1)) return;
 		if(detectDataMisaaligned(1)) return;
-		t1 = DMemory[position] <<8;//<< 24 >> 16;
-		t2 = DMemory[position+1] ;//<< 24 >> 24;
+		t1 = DMemory[position] << 8;//<< 24 >> 16;
+		t2 = DMemory[position+1]; //<< 24 >> 24;
 		reg[rt] = t1 + t2;
 		detectWrite2Zero("I");
 		detectNumberOverflow("I", true);
@@ -187,7 +204,10 @@ void I_format(string op) {
 		position = reg[rs] + immediate; // need detection
 		if(detectMemoryOverflow(0)) return;
 		if(detectDataMisaaligned(0)) return;
-		reg[rt] = DMemory[position];
+		//reg[rt] = DMemory[position]<<24>>24;//signExtension(DMemory[position]);//DMemory[position];
+		inT1 = DMemory[position];
+		inT1 = inT1 << 24 >> 24;
+		reg[rt] = inT1;
 		detectWrite2Zero("I");
 		detectNumberOverflow("I", true);
 	}
@@ -196,7 +216,7 @@ void I_format(string op) {
 		position = reg[rs] + immediate; // need detection
 		if(detectMemoryOverflow(0)) return;
 		if(detectDataMisaaligned(0)) return;
-		reg[rt] = DMemory[position] ;//<< 24 >> 24;
+		reg[rt] = DMemory[position];//<< 24 >> 24;
 		detectWrite2Zero("I");
 		detectNumberOverflow("I", true);
 	}

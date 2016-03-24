@@ -5,6 +5,7 @@ inline void detectWrite2Zero(string format);
 inline void detectNumberOverflow(string format);
 inline bool detectMemoryOverflow(int n);
 inline bool detectDataMisaaligned(int n);
+//inline int signExtension(int instr);
 
 void R_format(string op);
 void I_format(string op);
