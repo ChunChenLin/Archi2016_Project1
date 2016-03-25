@@ -1,6 +1,7 @@
 #include "load.h"
 
 void Open() {
+
 	iimage = fopen("iimage.bin", "rb");
 	dimage = fopen("dimage.bin", "rb");
 	error_dump = fopen("error_dump.rpt", "wb");
@@ -34,14 +35,14 @@ void DImg() {
 	for(int i=0; i<4; i++) {
 		tmp = (tmp<<8) + (unsigned char)dimageBuffer[i];
 	}
-	reg[29] = tmp; //$SP
+	Register::reg[29] = tmp; //$SP
 
 	for(int i=4; i<8; i++) {
 		num = (num<<8) + (unsigned char)dimageBuffer[i];
 	}
 
 	for(int i=8; i<8+4*num; i++) {
-		DMemory[index++] = dimageBuffer[i];
+		Memory::DMemory[index++] = dimageBuffer[i];
 	}
 }
 
@@ -51,15 +52,15 @@ void IImg() {
 	for(int i=0; i<4; i++) {
 		tmp = (tmp<<8) + (unsigned char)iimageBuffer[i];
 	}
-	PC = tmp;
+	Register::PC = tmp;
 
 	for(int i=4; i<8; i++) {
 		num = (num<<8) + (unsigned char)iimageBuffer[i];
 	}
 
-	index = PC;
+	index = Register::PC;
 	for(int i=8; i<8+4*num; i++) {
-		IMemory[index++] = iimageBuffer[i];
+		Memory::IMemory[index++] = iimageBuffer[i];
 	}
 }
 

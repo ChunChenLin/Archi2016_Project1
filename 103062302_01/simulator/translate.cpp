@@ -4,10 +4,10 @@ void Assembly() {
 
 	/* judge and call instruction func */
 	Opcode();
-	switch (op) {
+	switch (Instruction::op) {
 		case 0: //R format
 			Func();
-			switch (func) {
+			switch (Instruction::func) {
 				case 32:
 					R_format("add");
 					break;
@@ -111,7 +111,7 @@ void Assembly() {
 			break;
 		case 63:
 			/* halt */
-			halt = true;
+			Terminal::halt = true;
 			break;
 	}
 }
