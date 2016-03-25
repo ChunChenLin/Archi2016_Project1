@@ -1,5 +1,6 @@
 #include "instruction.h"
 #include "global.h"
+#include <bitset>
 
 /* look up Appendix A */
 
@@ -19,6 +20,7 @@ inline void detectWrite2Zero(string format) {
 
 // add, sub, addi, lw, lh, lhu, lb,
 // lbu, sw, sh, sb, beq, bne
+
 inline void detectNumberOverflow(string format, bool sub, bool isPos) {
 	unsigned sign_rs, sign_rt, sign_rd, sign_immediate, sign_pos;
 	sign_rs = Register::reg[Instruction::rs]>>31;
@@ -28,8 +30,11 @@ inline void detectNumberOverflow(string format, bool sub, bool isPos) {
 	sign_immediate = Instruction::immediate>>31;
 	sign_pos = Memory::position>>31;
 
+	//uint32_t urs, urt, urd, uimm, upos;
+	//urs = Register::reg[Instruction::rs]>>31;
+
 	if(format=="R") {
-		if(sign_rs==sign_rt && sign_rs!=sign_rd) {
+		if(sign_rs==sign_rt && sign_rs!=sign_rd/*(Irs>0&&Irt>0&&Ird<0)||(Irs<0&&Irt<0&&Irs>0)*/) {
 			Terminal::numberOverflow = true;
 		}
 	} else { //I format
@@ -43,8 +48,15 @@ inline void detectNumberOverflow(string format, bool sub, bool isPos) {
 	}
 }
 
+// a + b = c;
+inline void NOVF(int a, int b, int c) { 
+	if((a>0&&b>0&&c<0) || (a<0&&b<0&&c>0)) {
+		Terminal::numberOverflow = true;
+	} 
+}
+
 inline bool detectMemoryOverflow(int n) {
-	if(Memory::position + n >= 1024) {
+	if(Memory::position + n >= 1024 || Memory::position + n < 0) {
 		Terminal::memoryOverflow = true;
 		Terminal::halt = true;
 		return true;
@@ -61,11 +73,16 @@ inline bool detectDataMisaaligned(int n) {
 
 void R_format(string op) { /* func is merged into op */
     RsRtRd();
+    signed int Irs,Irt,Ird;
+    Irs = (int)Register::reg[Instruction::rs];
+    Irt = (int)Register::reg[Instruction::rt];
 
     if(op == "add")	{
     	Register::reg[Instruction::rd] = Register::reg[Instruction::rs] + Register::reg[Instruction::rt];
     	detectWrite2Zero("R");
-    	detectNumberOverflow("R", false, false);
+		Ird = Irs + Irt;
+    	NOVF(Irs,Irt,Ird);
+    	//detectNumberOverflow("R", false, false);
     }
 	else if(op == "addu") {
 		Register::reg[Instruction::rd] = Register::reg[Instruction::rs] + Register::reg[Instruction::rt];
@@ -74,7 +91,9 @@ void R_format(string op) { /* func is merged into op */
 	else if(op == "sub") {
 		Register::reg[Instruction::rd] = Register::reg[Instruction::rs] - Register::reg[Instruction::rt];
 		detectWrite2Zero("R");
-		detectNumberOverflow("R", true, false);
+		Ird = Irs - Irt;
+    	NOVF(Irs,(~Irt)+1,Ird);
+		//detectNumberOverflow("R", true, false);
 	}
 	else if(op == "and") {
 		Register::reg[Instruction::rd] = Register::reg[Instruction::rs] & Register::reg[Instruction::rt];
@@ -131,12 +150,18 @@ void I_format(string op) {
 	bool isMemoryOverflow = false, isDataMisaaligned = false;
 
 	RsRtRd();
+	signed int Irs,Irt,Ird,Iimm,Ipos;
+    Irs = (int)Register::reg[Instruction::rs];
+    Irt = (int)Register::reg[Instruction::rt];
 
 	if(op == "addi") {
 		SignedImmediate();
 		Register::reg[Instruction::rt] = Register::reg[Instruction::rs] + Instruction::immediate;
 		detectWrite2Zero("I");
-		detectNumberOverflow("I", false, false);
+		Iimm = (int)Instruction::immediate;
+		Irt = Irs + Iimm;
+    	NOVF(Irs,Iimm,Irt);
+		//detectNumberOverflow("I", false, false);
 	}
 	else if(op == "addiu") {
 		//UnsignedImmediate();
@@ -167,7 +192,10 @@ void I_format(string op) {
 			Register::reg[Instruction::rt]
 			);*/
 		detectWrite2Zero("I");
-		detectNumberOverflow("I", false, true);
+		Iimm = (int)Instruction::immediate;
+		Ipos = Irs + Iimm;
+    	NOVF(Irs,Iimm,Ipos);
+		//detectNumberOverflow("I", false, true);
 	}
 	else if(op == "lh") {
 		SignedImmediate();
@@ -189,7 +217,10 @@ void I_format(string op) {
 		inT2 = inT2 << 24 >> 24;
 		Register::reg[Instruction::rt] = (short)(inT1+inT2);*/
 		detectWrite2Zero("I");
-		detectNumberOverflow("I", false, true);
+		Iimm = (int)Instruction::immediate;
+		Ipos = Irs + Iimm;
+    	NOVF(Irs,Iimm,Ipos);
+		//detectNumberOverflow("I", false, true);
 	}
 	else if(op == "lhu") {
 		SignedImmediate();
@@ -204,7 +235,10 @@ void I_format(string op) {
 			Register::reg[Instruction::rt] = t1 + t2;
 		}
 		detectWrite2Zero("I");
-		detectNumberOverflow("I", false, true);
+		Iimm = (int)Instruction::immediate;
+		Ipos = Irs + Iimm;
+    	NOVF(Irs,Iimm,Ipos);
+		//detectNumberOverflow("I", false, true);
 	}
 	else if(op == "lb") {
 		SignedImmediate();
@@ -220,7 +254,10 @@ void I_format(string op) {
 			Register::reg[Instruction::rt] = inT1;
 		}
 		detectWrite2Zero("I");
-		detectNumberOverflow("I", false, true);
+		Iimm = (int)Instruction::immediate;
+		Ipos = Irs + Iimm;
+    	NOVF(Irs,Iimm,Ipos);
+		//detectNumberOverflow("I", false, true);
 	}
 	else if(op == "lbu") {
 		SignedImmediate();
@@ -233,7 +270,10 @@ void I_format(string op) {
 			Register::reg[Instruction::rt] = Memory::DMemory[Memory::position];//<< 24 >> 24;
 		}
 		detectWrite2Zero("I");
-		detectNumberOverflow("I", false, true);
+		Iimm = (int)Instruction::immediate;
+		Ipos = Irs + Iimm;
+    	NOVF(Irs,Iimm,Ipos);
+		//detectNumberOverflow("I", false, true);
 	}
 	else if(op == "sw") {
 		SignedImmediate();
@@ -252,7 +292,10 @@ void I_format(string op) {
 			Memory::DMemory[Memory::position + 2] = (Register::reg[Instruction::rt] >> 8) & 0xff;
 			Memory::DMemory[Memory::position + 3] = (Register::reg[Instruction::rt]) & 0xff;
 		}
-		detectNumberOverflow("I", false, true);
+		Iimm = (int)Instruction::immediate;
+		Ipos = Irs + Iimm;
+    	NOVF(Irs,Iimm,Ipos);
+		//detectNumberOverflow("I", false, true);
 	}
 	else if(op == "sh") {
 		SignedImmediate();
@@ -265,7 +308,10 @@ void I_format(string op) {
 			Memory::DMemory[Memory::position] = (Register::reg[Instruction::rt] >> 8) & 0xff;//Register::reg[Instruction::rt] << 16 >> 24;
 			Memory::DMemory[Memory::position+1] = Register::reg[Instruction::rt]; //<< 24 >> 24;
 		}
-		detectNumberOverflow("I", false, true);
+		Iimm = (int)Instruction::immediate;
+		Ipos = Irs + Iimm;
+    	NOVF(Irs,Iimm,Ipos);
+		//detectNumberOverflow("I", false, true);
 	}
 	else if(op == "sb") {
 		SignedImmediate();
@@ -277,7 +323,10 @@ void I_format(string op) {
 		if(!isMemoryOverflow && !isDataMisaaligned) {
 			Memory::DMemory[Memory::position] = Register::reg[Instruction::rt]; //<< 24 >> 24;
 		}
-		detectNumberOverflow("I", false, true);
+		Iimm = (int)Instruction::immediate;
+		Ipos = Irs + Iimm;
+    	NOVF(Irs,Iimm,Ipos);
+		//detectNumberOverflow("I", false, true);
 	}
 	else if(op == "lui") {
 		UnsignedImmediate();

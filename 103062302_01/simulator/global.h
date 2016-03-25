@@ -7,10 +7,6 @@
 
 using namespace std;
 
-extern FILE *iimage, *dimage, *error_dump, *snapshot;
-extern unsigned iimageLen, dimageLen;
-extern char *iimageBuffer, *dimageBuffer;
-
 class Register {
 public:
 	static unsigned reg[32], PC, cycle;
@@ -32,7 +28,5 @@ public:
 	static bool halt;
 	static bool write2Zero, numberOverflow, memoryOverflow, dataMisaaligned;
 };
-
-
 
 #endif
