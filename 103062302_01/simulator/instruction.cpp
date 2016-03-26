@@ -56,7 +56,7 @@ inline void NOVF(int a, int b, int c) {
 }
 
 inline bool detectMemoryOverflow(int n) {
-	if(Memory::position + n >= 1024 || Memory::position + n < 0) {
+	if(Memory::position + n >= 1024 || Memory::position >= 1024) {
 		Terminal::memoryOverflow = true;
 		Terminal::halt = true;
 		return true;
